@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 class Board:
     def __init__(self, width: int, height: int):
@@ -37,8 +38,7 @@ class Board:
                 break
             # Check if top row
             if idx == len(self.board) - 1:
-                # do something
-                print("error")
+                raise ValueError("Max counters reached in column")
 
         return self.board
 
@@ -93,16 +93,25 @@ class Board:
 
 
 def turn(board: Board, counter: str, win_length: int) -> bool:
-    counter_pos = int(input(f"Player {counter} enter column number: "))
-    print()
-    board.insert_counter(counter_pos, counter)
-    board.print()
+    while True:
+        try:
+            counter_pos = int(input(f"Player {counter} enter column number: "))
 
-    if board.check_win(win_length, counter, counter_pos):
-        print(f"Player {counter} Wins!")
-        return True
-    else:
-        return False
+            if counter_pos < 0:
+                raise ValueError("Cant enter values below 0")
+
+            print()
+            board.insert_counter(counter_pos, counter)
+            board.print()
+
+            if board.check_win(win_length, counter, counter_pos):
+                print(f"Player {counter} Wins!")
+                return True
+            else:
+                return False
+        except Exception as e:
+            logging.warning("Invalid input")
+            logging.warning(e)
 
 
 def play_game():
