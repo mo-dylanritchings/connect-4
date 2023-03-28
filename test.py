@@ -1,15 +1,9 @@
-import timeit
 
 from main import *
-
 
 def test_board_add_counter(board):
     board.insert_counter(0, "o")
     assert board.get_board()[-1][0] == "o"
-
-
-# def test_board_add_counter_over(board):
-#     board.insert_counter(10, "o")
 
 
 def test_check_win_horizontal(board):
@@ -57,7 +51,8 @@ def test_check_win_positive_gradient(board):
     assert board.check_win(4, "o", 1) is True
 
 
-def test_check_win_positive_gradient2(board):
+def test_check_win_positive_gradient2():
+    board = Board(7, 6)
     board.insert_counter(1, "x")
     board.insert_counter(2, "x")
     board.insert_counter(2, "x")
@@ -86,6 +81,6 @@ if __name__ == '__main__':
     board = Board(7, 6)
     test_check_win_positive_gradient(board)
     board = Board(7, 6)
-    timeit.timeit(lambda: test_check_win_positive_gradient(board), number=10000)
 
+    # cProfile.run("test_check_win_positive_gradient(board)", )
 

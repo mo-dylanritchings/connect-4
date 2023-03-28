@@ -1,11 +1,14 @@
 import itertools
 import logging
 
+
 class Board:
+
     def __init__(self, width: int, height: int):
         self.board = [[" " for x in range(width)] for y in range(height)]
 
-    def __print_border_row(self, length: int):
+    @staticmethod
+    def __print_border_row(length: int):
         for x in range(length):
             print("---", end="")
         print("--")
@@ -49,6 +52,7 @@ class Board:
 
     def __check_col(self, length: int, counter: str, position: int) -> bool:
         line = ''.join(row[position] for row in self.board)
+
         if counter * length in line:
             return True
 
@@ -69,6 +73,7 @@ class Board:
 
     def __check_pos_line(self, length: int, counter: str, col_idx: int, row_idx: int) -> bool:
         line = ""
+
         for n in range(-length, length, 1):
             if not (col_idx + n < 0 or col_idx + n >= len(self.board[0]) or
                     row_idx - n < 0 or row_idx - n >= len(self.board)):
