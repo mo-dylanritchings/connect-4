@@ -1,5 +1,6 @@
 import itertools
 import logging
+import requests
 
 
 class Board:
@@ -49,17 +50,22 @@ class Board:
         line = ''.join(self.board[row_idx])
         if counter * length in line:
             return True
+        else:
+            return False
 
     def __check_col(self, length: int, counter: str, position: int) -> bool:
         line = ''.join(row[position] for row in self.board)
 
         if counter * length in line:
             return True
+        else:
+            return False
 
     def __get_row_from_col(self, counter: str, col_idx: int) -> int:
         for row_idx, row in enumerate(self.board):
             if row[col_idx] == counter:
                 return row_idx
+        return -1
 
     def __check_ngtv_line(self, length: int, counter: str, col_idx: int, row_idx: int) -> bool:
         line = ""
@@ -70,6 +76,8 @@ class Board:
 
         if counter * length in line:
             return True
+        else:
+            return False
 
     def __check_pos_line(self, length: int, counter: str, col_idx: int, row_idx: int) -> bool:
         line = ""
@@ -81,6 +89,8 @@ class Board:
 
         if counter * length in line:
             return True
+        else:
+            return False
 
     def check_win(self, length: int, counter: str, col_idx: int) -> bool:
         row_idx = self.__get_row_from_col(counter, col_idx)
@@ -96,11 +106,22 @@ class Board:
         else:
             return False
 
+def send_win(name: str):
+    url = "https://odoauntvkj.execute-api.eu-west-2.amazonaws.com/prod/"
+    response = requests.get(f"{url}{name}")
+    if response.status_code == 200:
+        print("Win added to scoreboard")
 
-def turn(board: Board, counter: str, win_length: int) -> bool:
+def get_scoreboard() -> object:
+    url = "https://z70wxp8hjj.execute-api.eu-west-2.amazonaws.com/prod/"
+    response = requests.get(url)
+    return response.json
+
+
+def turn(board: Board, counter: str, win_length: int, player: str) -> bool:
     while True:
         try:
-            counter_pos = int(input(f"Player {counter} enter column number: "))
+            counter_pos = int(input(f"{player.title()} ({counter}) enter column number: "))
 
             if counter_pos < 0:
                 raise ValueError("Cant enter values below 0")
@@ -110,7 +131,8 @@ def turn(board: Board, counter: str, win_length: int) -> bool:
             board.print()
 
             if board.check_win(win_length, counter, counter_pos):
-                print(f"Player {counter} Wins!")
+                print(f"{player.title()} ({counter}) Wins!")
+
                 return True
             else:
                 return False
@@ -120,13 +142,23 @@ def turn(board: Board, counter: str, win_length: int) -> bool:
 
 
 def play_game():
+    print(get_scoreboard())
     win_length = 4
     counters = itertools.cycle(["o", "x"])
     board = Board(7, 6)
+
+    players = itertools.cycle([
+        input(f"Player 1 ({next(counters)}) enter name: "),
+        input(f"Player 2 ({next(counters)}) enter name: ")
+    ])
+
     board.print()
 
     while True:
-        if turn(board, next(counters), win_length):
+        player = next(players)
+        if turn(board, next(counters), win_length, player):
+            send_win(player)
+            print(get_scoreboard())
             break
 
 
