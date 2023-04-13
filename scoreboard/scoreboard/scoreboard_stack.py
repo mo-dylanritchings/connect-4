@@ -23,13 +23,13 @@ class ScoreboardStack(Stack):
         self.create_gateway(table_lambda)
 
 
-    def create_ddb(self) -> dynamodb:
+    def create_ddb(self) -> dynamodb.Table:
       return dynamodb.Table(self, "Connect4_Scoreboard_DB",
     partition_key=dynamodb.Attribute(name="player", type=dynamodb.AttributeType.STRING)
                             )
 
 
-    def create_lambda(self, table) -> aws_lambda:
+    def create_lambda(self, table) -> aws_lambda.Function:
        return aws_lambda.Function(self, "Connect4_Scoreboard_Lambda",
                                   code=aws_lambda.Code.from_asset("./lambda/"),
                                   runtime=aws_lambda.Runtime.PYTHON_3_8,
