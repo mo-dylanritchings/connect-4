@@ -1,7 +1,7 @@
 import itertools
 import logging
 import requests
-
+import json
 
 class Board:
 
@@ -16,7 +16,7 @@ class Board:
 
     def print(self):
         print(end=" ")
-        for count in range(len(self.board) + 1):
+        for count in range(len(self.board[0])):
             print("|", count, end="")
 
         print("|")
@@ -106,16 +106,43 @@ class Board:
         else:
             return False
 
+    def check_draw(self) -> bool:
+        line = ''.join(self.board[0])
+
+        if " " in line:
+            return False
+        else:
+            return True
+
+
 def send_win(name: str):
-    url = "https://odoauntvkj.execute-api.eu-west-2.amazonaws.com/prod/"
-    response = requests.get(f"{url}{name}")
+    url = "https://2o3owjg2w7.execute-api.eu-west-2.amazonaws.com/prod/scoreboard"
+    response = requests.post(
+        url,
+        json={"player": name.title()}
+    )
+
     if response.status_code == 200:
         print("Win added to scoreboard")
 
-def get_scoreboard() -> object:
-    url = "https://z70wxp8hjj.execute-api.eu-west-2.amazonaws.com/prod/"
+def get_scoreboard() -> dict:
+    url = "https://2o3owjg2w7.execute-api.eu-west-2.amazonaws.com/prod/scoreboard"
     response = requests.get(url)
-    return response.json
+    return json.loads(response.content)
+
+def print_scoreboard(scoreboard: dict):
+
+    print()
+    print("-"*29)
+    print (f"| Scoreboard                |")
+    print("-"*29)
+    print (f"| Player         | Score    |")
+    print("-"*29)
+    spc=" "
+    for name, score in scoreboard.items():
+        print (f"| {name}{spc*(15-len(name))}| {score}{spc*(9-len(score))}|")
+        print ("-"*29)
+    print()
 
 
 def turn(board: Board, counter: str, win_length: int, player: str) -> bool:
@@ -136,16 +163,17 @@ def turn(board: Board, counter: str, win_length: int, player: str) -> bool:
                 return True
             else:
                 return False
+
         except Exception as e:
             logging.warning("Invalid input")
             logging.warning(e)
 
 
 def play_game():
-    print(get_scoreboard())
+    print_scoreboard(get_scoreboard())
     win_length = 4
+    board = Board(2, 2)
     counters = itertools.cycle(["o", "x"])
-    board = Board(7, 6)
 
     players = itertools.cycle([
         input(f"Player 1 ({next(counters)}) enter name: "),
@@ -156,11 +184,19 @@ def play_game():
 
     while True:
         player = next(players)
+        if board.check_draw():
+            print()
+            print("It is a draw!")
+            print()
+            break
         if turn(board, next(counters), win_length, player):
+            print()
             send_win(player)
-            print(get_scoreboard())
+            print()
             break
 
+    print_scoreboard(get_scoreboard())
 
 if __name__ == '__main__':
     play_game()
+    # print_scoreboard(get_scoreboard())
